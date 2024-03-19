@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,11 @@ namespace WitnessTest
             this.y = y;
             this.height = height;
             this.width = width;
+        }
+
+        public void wallReset()
+        {
+
         }
     }
 }

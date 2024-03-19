@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WitnessTest
-{
+{ 
     public partial class Form1 : Form
     {
         //Rectangle blackLayer = new Rectangle(40, 40, 620, 620);
         //Brush blackBrush = new SolidBrush(Color.Black);
 
+        PointF mousePosition = new PointF();
         public Form1()
         {
             InitializeComponent();
@@ -46,6 +47,14 @@ namespace WitnessTest
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
            // e.Graphics.FillRectangle(blackBrush, blackLayer);
+        }
+
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
+            mousePosition = Cursor.Position;
+
+            xInputF1.Text = mousePosition.X.ToString();
+            yInputF1.Text = mousePosition.Y.ToString();
         }
     }
 }
