@@ -19,7 +19,7 @@ namespace WitnessTest
         public Form1()
         {
             InitializeComponent();
-            ChangeScreen(this, new MenuScreen());
+            ChangeScreen(this, new GameScreen());
         }
 
         public static void ChangeScreen(object sender, UserControl next)

@@ -1,6 +1,6 @@
 ﻿namespace WitnessTest
 {
-    partial class MenuScreen
+    partial class GameScreen
     {
         /// <summary> 
         /// Required designer variable.

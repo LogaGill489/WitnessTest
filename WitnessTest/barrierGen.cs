@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WitnessTest
@@ -41,13 +42,28 @@ namespace WitnessTest
         public string type;
         public int xLocation, yLocation;
 
-        public int width = 24, height = 24;
+        public int width, height, x, y;
 
         public barrierGen (string type, int xLocation, int yLocation)
         {
             this.type = type;
             this.xLocation = xLocation;
             this.yLocation = yLocation;
+
+            if (type == "x")
+            {
+                x = 80 + ((xLocation - 1) * 144);
+                y = 24 + ((yLocation - 1) * 144);
+                width = 56;
+                height = 24;
+            }
+            else if (type == "y")
+            {
+                x = 24 + ((xLocation - 1) * 144);
+                y = 80 + ((yLocation - 1) * 144);
+                width = 24;
+                height = 56;
+            }
         }
     }
 }
