@@ -74,14 +74,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Silver;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.Controls.Add(this.titleLabel);
             this.Controls.Add(this.exitButton);
             this.Controls.Add(this.startButton);
             this.DoubleBuffered = true;
             this.Name = "TitleScreen";
             this.Size = new System.Drawing.Size(648, 648);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.TitleScreen_Paint);
             this.ResumeLayout(false);
 
         }

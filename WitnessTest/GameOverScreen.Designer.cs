@@ -28,15 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.restartButton = new System.Windows.Forms.Button();
             this.winLabel = new System.Windows.Forms.Label();
             this.scoreLabel = new System.Windows.Forms.Label();
+            this.runTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // restartButton
             // 
             this.restartButton.BackColor = System.Drawing.Color.Wheat;
-            this.restartButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.restartButton.Font = new System.Drawing.Font("Palatino Linotype", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.restartButton.ForeColor = System.Drawing.Color.Black;
             this.restartButton.Location = new System.Drawing.Point(174, 316);
             this.restartButton.Name = "restartButton";
@@ -72,10 +74,16 @@
             this.scoreLabel.Text = "You Beat The Game In 000 Seconds!";
             this.scoreLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // runTimer
+            // 
+            this.runTimer.Interval = 2;
+            this.runTimer.Tick += new System.EventHandler(this.runTimer_Tick);
+            // 
             // GameOverScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.Gainsboro;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.Controls.Add(this.scoreLabel);
             this.Controls.Add(this.winLabel);
@@ -92,5 +100,6 @@
         private System.Windows.Forms.Button restartButton;
         private System.Windows.Forms.Label winLabel;
         private System.Windows.Forms.Label scoreLabel;
+        private System.Windows.Forms.Timer runTimer;
     }
 }

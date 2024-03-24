@@ -68,6 +68,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TitleScreen.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -89,6 +94,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="TitleScreen.resx">
       <DependentUpon>TitleScreen.cs</DependentUpon>
@@ -107,10 +113,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\endWitnessBackground1.jpg" />
+    <None Include="Resources\endWitnessBackground.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\startWitnessBackground.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\startWitnessBackground1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\endWitnessBackground1.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

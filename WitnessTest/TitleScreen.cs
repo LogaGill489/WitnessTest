@@ -15,8 +15,6 @@ namespace WitnessTest
         public TitleScreen()
         {
             InitializeComponent();
-
-
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -27,17 +25,6 @@ namespace WitnessTest
         private void exitButton_Click(object sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-        private void TitleScreen_Paint(object sender, PaintEventArgs e)
-        {
-            Rectangle bottomLeft = new Rectangle(0, 550, 60, 24);
-            Rectangle bottomRight = new Rectangle(36, 574, 24, 74);
-
-            Brush brownBrush = new SolidBrush(Color.SandyBrown);
-
-           // e.Graphics.FillRectangle(brownBrush, bottomLeft);
-            //e.Graphics.FillRectangle(brownBrush, bottomRight);
         }
     }
 }

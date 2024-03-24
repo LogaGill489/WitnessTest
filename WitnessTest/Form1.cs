@@ -20,7 +20,7 @@ namespace WitnessTest
         {
             InitializeComponent();
 
-            ChangeScreen(this, new TitleScreen());
+            ChangeScreen(this, new GameScreen());
         }
 
         public static void ChangeScreen(object sender, UserControl next)
