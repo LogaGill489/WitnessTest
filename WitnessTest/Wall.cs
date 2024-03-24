@@ -10,6 +10,8 @@ namespace WitnessTest
 {
     internal class Wall
     {
+        //acts as a rectangle
+        //used to generate the walls on each side of the player
         public int x, y, height, width;
 
         public Wall(int x, int y, int height, int width)
@@ -18,11 +20,6 @@ namespace WitnessTest
             this.y = y;
             this.height = height;
             this.width = width;
-        }
-
-        public void wallReset()
-        {
-
         }
     }
 }

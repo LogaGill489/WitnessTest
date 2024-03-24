@@ -19,7 +19,8 @@ namespace WitnessTest
         public Form1()
         {
             InitializeComponent();
-            ChangeScreen(this, new GameScreen());
+
+            ChangeScreen(this, new TitleScreen());
         }
 
         public static void ChangeScreen(object sender, UserControl next)
@@ -44,17 +45,26 @@ namespace WitnessTest
             next.Focus();
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
-        {
-           // e.Graphics.FillRectangle(blackBrush, blackLayer);
-        }
-
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
             mousePosition = Cursor.Position;
 
             xInputF1.Text = mousePosition.X.ToString();
             yInputF1.Text = mousePosition.Y.ToString();
+        }
+
+        private void updateScreen_Tick(object sender, EventArgs e)
+        {
+            levelLabel.Text = $"Level: {GameScreen.level}";
+            if (GameScreen.level == 13 || GameScreen.level == 0)
+            {
+                levelLabel.Visible = false;
+            }
+            else
+            {
+                levelLabel.Visible = true;
+            }
+            levelLabel.Refresh();
         }
     }
 }

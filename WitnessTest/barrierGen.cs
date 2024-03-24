@@ -9,7 +9,7 @@ namespace WitnessTest
 {
     internal class barrierGen
     {
-        /// x position graph
+        /// y position graph
         /// 24x ---------------------------|
         /// | 1--1------2------3------4---||
         /// | | 120x | 120x | 120x | 120x ||
@@ -24,7 +24,7 @@ namespace WitnessTest
         /// </summary>
         /// 
 
-        /// y position graph
+        /// x position graph
         /// 24x ---------------------------|
         /// | 1------2------3------4------5|
         /// | 1 120x | 120x | 120x | 120x ||
@@ -44,20 +44,20 @@ namespace WitnessTest
 
         public int width, height, x, y;
 
-        public barrierGen (string type, int xLocation, int yLocation)
+        public barrierGen (string type, int xLocation, int yLocation) //accepts x or y input as well as a location and draws it based of the grids above
         {
             this.type = type;
             this.xLocation = xLocation;
             this.yLocation = yLocation;
 
-            if (type == "x")
+            if (type == "x") //generates along the x pattern
             {
                 x = 80 + ((xLocation - 1) * 144);
                 y = 24 + ((yLocation - 1) * 144);
                 width = 56;
                 height = 24;
             }
-            else if (type == "y")
+            else if (type == "y") //generates along the y pattern
             {
                 x = 24 + ((xLocation - 1) * 144);
                 y = 80 + ((yLocation - 1) * 144);

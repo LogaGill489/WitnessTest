@@ -40,7 +40,6 @@
             // 
             // gameTimer
             // 
-            this.gameTimer.Enabled = true;
             this.gameTimer.Interval = 2;
             this.gameTimer.Tick += new System.EventHandler(this.gameTimer_Tick);
             // 
@@ -54,6 +53,7 @@
             this.xInput.Size = new System.Drawing.Size(25, 26);
             this.xInput.TabIndex = 0;
             this.xInput.Text = "0";
+            this.xInput.Visible = false;
             // 
             // yInput
             // 
@@ -65,6 +65,7 @@
             this.yInput.Size = new System.Drawing.Size(25, 26);
             this.yInput.TabIndex = 1;
             this.yInput.Text = "0";
+            this.yInput.Visible = false;
             // 
             // rectXPos
             // 
@@ -76,6 +77,7 @@
             this.rectXPos.Size = new System.Drawing.Size(25, 26);
             this.rectXPos.TabIndex = 2;
             this.rectXPos.Text = "0";
+            this.rectXPos.Visible = false;
             // 
             // rectYPos
             // 
@@ -87,6 +89,7 @@
             this.rectYPos.Size = new System.Drawing.Size(25, 26);
             this.rectYPos.TabIndex = 3;
             this.rectYPos.Text = "0";
+            this.rectYPos.Visible = false;
             // 
             // listLabel
             // 
@@ -98,6 +101,7 @@
             this.listLabel.Size = new System.Drawing.Size(25, 26);
             this.listLabel.TabIndex = 4;
             this.listLabel.Text = "0";
+            this.listLabel.Visible = false;
             // 
             // listLabel2
             // 
@@ -109,8 +113,9 @@
             this.listLabel2.Size = new System.Drawing.Size(25, 26);
             this.listLabel2.TabIndex = 5;
             this.listLabel2.Text = "0";
+            this.listLabel2.Visible = false;
             // 
-            // MenuScreen
+            // GameScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -122,7 +127,7 @@
             this.Controls.Add(this.yInput);
             this.Controls.Add(this.xInput);
             this.DoubleBuffered = true;
-            this.Name = "MenuScreen";
+            this.Name = "GameScreen";
             this.Size = new System.Drawing.Size(648, 648);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.MenuScreen_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MenuScreen_KeyDown);

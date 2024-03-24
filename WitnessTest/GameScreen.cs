@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,19 +30,19 @@ namespace WitnessTest
         List<Trail> oppositeTrail = new List<Trail>();
         List<TrailIntersection> oppositeIntersection = new List<TrailIntersection>();
 
+        //variables used to track intersections and previous trail positions
         int state = 0;
-        int prevState = 0;
         bool runIntersection = false;
         bool inIntersection = false;
+
+        //integers used for tracking player's x and y for intersections
+        int interX;
+        int interY;
 
         //follow circle
         Rectangle oppositeFollowCircle = new Rectangle();
         Rectangle followCircle;
         Rectangle prevFollowCircle = new Rectangle();
-
-        //brushes
-        //background
-        Brush blackBrush = new SolidBrush(Color.Black);
 
         //level-dependant brushes
         Brush wallBrush;
@@ -56,9 +58,6 @@ namespace WitnessTest
         Rectangle exit;
         Rectangle exit2;
 
-        int interX;
-        int interY;
-
         //changes between active state modes
         bool active = false;
 
@@ -70,11 +69,15 @@ namespace WitnessTest
         bool wallTouch;
 
         //tracks player's level
-        int level = 0;
+        public static int level = 0;
 
+        //bools used to track various aspects of the game
         bool initialRunStopListError = false;
         bool invertedDoubleState = false;
-
+        bool doubleState = false;
+        
+        //tracks players playtime
+        public static Stopwatch playTime = new Stopwatch();
         #endregion
 
         /// playable area
@@ -93,8 +96,9 @@ namespace WitnessTest
         public GameScreen()
         {
             InitializeComponent();
-            gameTimer.Enabled = true;
+            gameTimer.Start(); //starts game timer
 
+            //generates central wall segments
             for (int k = 0; k < 4; k++)
             {
                 for (int i = 0; i < 4; i++)
@@ -104,6 +108,7 @@ namespace WitnessTest
                 }
             }
 
+            //generates exterior walls
             Wall outerLayer = new Wall(0, 0, this.Height, 24);
             outerWalls.Add(outerLayer);
 
@@ -116,8 +121,11 @@ namespace WitnessTest
             outerLayer = new Wall(0, this.Height - 24, 24, this.Width);
             outerWalls.Add(outerLayer);
 
-            levelGen();
-            Cursor.Hide();
+            playTime.Start(); //starts timer that tracks the player's position
+
+            level = 0;
+            levelGen(); //generates a new level
+            Cursor.Hide(); //hides the player's cursor
         }
 
         private void gameTimer_Tick(object sender, EventArgs e)
@@ -151,12 +159,24 @@ namespace WitnessTest
 
                 foreach (barrierGen barrier in barriers)
                 {
+                    //checks for player's collision with the barrier
                     if (cursor.IntersectsWith(new Rectangle(barrier.x, barrier.y, barrier.width, barrier.height)))
                     {
                         resetPosition();
                     }
-                    Rectangle oppositeCursor = new Rectangle(this.Width - cursor.X, this.Height - cursor.Y, 1, 1);
-                    if (oppositeCursor.IntersectsWith(new Rectangle(barrier.x, barrier.y, barrier.width, barrier.height)) && invertedDoubleState)
+
+                    //checks for collisions with the opposite path in doubled mode
+                    Rectangle oppositeCursor;
+                    if (invertedDoubleState)
+                    {
+                        oppositeCursor = new Rectangle(this.Width - cursor.X, this.Height - cursor.Y, 1, 1);
+                    }
+                    else
+                    {
+                        oppositeCursor = new Rectangle(this.Width - cursor.X, cursor.Y, 1, 1);
+                    }
+
+                    if (oppositeCursor.IntersectsWith(new Rectangle(barrier.x, barrier.y, barrier.width, barrier.height)) && (invertedDoubleState || doubleState))
                     {
                         resetPosition();
                     }
@@ -186,37 +206,11 @@ namespace WitnessTest
                 {
                     resetPosition();
                 }
+                if (doubleState && cursor.X >= 308)
+                {
+                    resetPosition();
+                }
 
-                //attempted fix for clipping issue
-                /*
-                if ((state == 1 || state == 2) && (prevState == 3 || prevState == 4)) //from x to y
-                {
-                    if (prevState == 3 && (cursor.X < intersection.Last().x - 60 || intersection.Last().x + 84 < cursor.X)) //right
-                    {
-                        //Cursor.Position = this.PointToScreen(new Point(intersection.Last().x + 136, intersection.Last().y + 12));
-                        Cursor.Position = this.PointToScreen(new Point(intersection.Last().x + 132, intersection.Last().y + 12));
-                    }
-                    else if (prevState == 4 && (cursor.X < intersection.Last().x - 60 || intersection.Last().x + 84 < cursor.X)) //left
-                    {
-                        //Cursor.Position = this.PointToScreen(new Point(intersection.Last().x - 136, intersection.Last().y + 12));
-                        Cursor.Position = this.PointToScreen(new Point(intersection.Last().x - 108, trail.Last().y + 12));
-                    }
-                    wallTouch = true;
-                }
-                
-                if ((state == 3 || state == 4) && (prevState == 1 || prevState == 2)) //from y to x
-                {
-                    if (prevState == 1 && (cursor.Y < intersection.Last().y - 60 || intersection.Last().y + 84 < cursor.Y)) //down
-                    {
-                        Cursor.Position = this.PointToScreen(new Point(intersection.Last().x + 12, intersection.Last().y + 132));
-                    }
-                    else if (prevState == 2 && (cursor.Y < intersection.Last().y - 60 || intersection.Last().y + 84 < cursor.Y)) //up
-                    {
-                        Cursor.Position = this.PointToScreen(new Point(intersection.Last().x + 12, intersection.Last().y - 108));
-                    }
-                    wallTouch = true;
-                }
-                */
 
                 inIntersection = false;
                 int prevListCount = intersection.Count;
@@ -253,30 +247,36 @@ namespace WitnessTest
                                 }
                             }
 
-                            goto BREAK;
+                            goto BREAK; //breaks out of imbedded for loop
                         }
                     }
                 }
             BREAK:
 
+                //stops issues with the doubled trail intersecting with the other trail
                 foreach (TrailIntersection trailInt in intersection)
                 {
-                    if (trailInt.x == 312 && trailInt.y == 312 && invertedDoubleState)
+                    if (trailInt.x == 312 && trailInt.y == 312 && invertedDoubleState) //stops central collisions from breaking the game from levels 6 - 8
                     {
                         intersection.Remove(trailInt);
                         oppositeIntersection.Remove(trailInt);
                         resetPosition();
                         break;
                     }
-                    if (oppositeIntersection.Contains(trailInt))
+                    else if (trailInt.x == 312 && doubleState) //stops any collision along the middle y-line in levels 9 - 12
+                    {
+                        intersection.Remove(trailInt);
+                        oppositeIntersection.Remove(trailInt);
+                        resetPosition();
+                        break;
+                    }
+                    if (oppositeIntersection.Contains(trailInt)) //stops collisions between the two trails during levels 6 - 8
                     {
                         intersection.Remove(trailInt);
                         resetPosition();
                         break;
                     }
                 }
-
-                prevState = state;
 
                 //trail generation code
                 for (int i = 0; i < 5; i++)
@@ -288,8 +288,8 @@ namespace WitnessTest
                         {
                             if (intersection.Last().y + 24 < cursor.Y) //cursor moving down
                             {
-                                state = 1;
-                                trailGen = new Trail(24 + (i * 144), intersection.Last().y + 24, 24, cursor.Y - (intersection.Last().y + 24), "down");
+                                state = 1; //tracks players state to be used later
+                                trailGen = new Trail(24 + (i * 144), intersection.Last().y + 24, 24, cursor.Y - (intersection.Last().y + 24), "down"); //new trail gen based on the player's direction
                                 resetTrail();
                                 break;
                             }
@@ -303,14 +303,14 @@ namespace WitnessTest
                         }
                         else if (cursor.Y >= 24 + (i * 144) && cursor.Y <= 48 + (i * 144)) //within X regions
                         {
-                            if (intersection.Last().x + 24 < cursor.X) //moving right
+                            if (intersection.Last().x + 24 < cursor.X) //cursor moving right
                             {
                                 state = 3;
                                 trailGen = new Trail(intersection.Last().x + 24, 24 + (i * 144), cursor.X - (intersection.Last().x + 24), 24, "right");
                                 resetTrail();
                                 break;
                             }
-                            else if (intersection.Last().x > cursor.X)
+                            else if (intersection.Last().x > cursor.X) //cursor moving left
                             {
                                 state = 4;
                                 trailGen = new Trail(cursor.X, 24 + (i * 144), intersection.Last().x - cursor.X, 24, "left");
@@ -345,7 +345,7 @@ namespace WitnessTest
                     }
                 }
 
-                //reverse code
+                //allows player to reverse
                 if (trail.Count > 1)
                 {
                     if (trail.Last().state == "right" && trail[trail.Count - 2].state == "left")
@@ -374,17 +374,17 @@ namespace WitnessTest
                     prevPosition = mousePosition;
                 }
 
-
-                //opposite code
-                if (level >= 6 && trail.Count > 0)
+                //opposite trail generation code
+                if ((invertedDoubleState || doubleState) && trail.Count > 0)
                 {
-                    oppositeTrail.Clear();
+                    oppositeTrail.Clear(); //clears the list to prevent duplicates
                     oppositeIntersection.Clear();
 
-                    if (invertedDoubleState)
+                    if (invertedDoubleState) //for levels 6 - 8
                     {
+                        //generates opposite follow circle
                         oppositeFollowCircle = new Rectangle(this.Width - followCircle.X - 24, this.Height - followCircle.Y - 24, 24, 24);
-                        foreach (Trail trails in trail)
+                        foreach (Trail trails in trail) //generates opposite based on other trails position
                         {
                             switch (trails.state)
                             {
@@ -403,24 +403,49 @@ namespace WitnessTest
                             }
                         }
 
+                        //generates intersection points
                         foreach (TrailIntersection trailInt in intersection)
                         {
                             oppositeIntersection.Add(new TrailIntersection(this.Width - trailInt.x - 24, this.Height - trailInt.y - 24));
                         }
                     }
-
-                    if (oppositeIntersection.Count > 2)
+                    else //for levels 9 - 12
                     {
-                        int tester = 0;
+                        //similar process to inverted opposite trail, however, mirrors the movements instead of inverting them
+                        oppositeFollowCircle = new Rectangle(this.Width - followCircle.X - 24, followCircle.Y, 24, 24);
+                        foreach (Trail trails in trail)
+                        {
+                            switch (trails.state)
+                            {
+                                case "up":
+                                    oppositeTrail.Add(new Trail(this.Width - trails.x - trails.width, trails.y, 24, trails.height, "down"));
+                                    break;
+                                case "down":
+                                    oppositeTrail.Add(new Trail(this.Width - trails.x - trails.width, trails.y, 24, trails.height, "up"));
+                                    break;
+                                case "left":
+                                    oppositeTrail.Add(new Trail(this.Width - trails.x - trails.width, trails.y, trails.width, 24, "right"));
+                                    break;
+                                case "right":
+                                    oppositeTrail.Add(new Trail(this.Width - trails.x - trails.width, trails.y, trails.width, 24, "left"));
+                                    break;
+                            }
+                        }
+
+                        foreach (TrailIntersection trailInt in intersection)
+                        {
+                            oppositeIntersection.Add(new TrailIntersection(this.Width - trailInt.x - 24, trailInt.y));
+                        }
                     }
                 }
 
-                if (cursor.IntersectsWith(new Rectangle(exit.X, exit.Y - (exit.Height / 2), exit.Width, exit.Height)) && level <= 5)
+                //determines if the player has reached the exit, and generates the next level
+                if (cursor.IntersectsWith(new Rectangle(exit.X, exit.Y - (exit.Height / 2), exit.Width, exit.Height)) && (level <= 5 || doubleState))
                 {
                     levelGen();
                 }
                 else if ((cursor.IntersectsWith(new Rectangle(exit.X + 20, exit.Y, exit.Width, exit.Height)) ||
-                         cursor.IntersectsWith(new Rectangle(0, exit2.Y, 18, 24))) && level >= 6 && 10 >= level)
+                         cursor.IntersectsWith(new Rectangle(0, exit2.Y, 18, 24))) && invertedDoubleState)
                 {
                     levelGen();
                 }
@@ -428,26 +453,30 @@ namespace WitnessTest
             Refresh();
         }
 
+        //resets players position
         private void resetPosition()
         {
-            if (trail.Last().state == "up" || trail.Last().state == "down")
+            if (trail.Last().state == "up" || trail.Last().state == "down") //determine players moving direction to reset players positon accordingly
             {
-                Cursor.Position = this.PointToScreen(new Point(trail.Last().x + 12, (int)prevPosition.Y));
+                Cursor.Position = this.PointToScreen(new Point(intersection.Last().x + 12, (int)prevPosition.Y));
                 wallTouch = true;
             }
             else
             {
-                Cursor.Position = this.PointToScreen(new Point((int)prevPosition.X, trail.Last().y + 12));
+                Cursor.Position = this.PointToScreen(new Point((int)prevPosition.X, intersection.Last().y + 12));
                 wallTouch = true;
             }
         }
 
+        //method used to reset the trails position on each tick
+        //prevents the trail list from having thousands of Trails in it
         private void resetTrail()
         {
             trail.Remove(trail.Last());
             trail.Add(trailGen);
         }
 
+        //method that is used to have the player move backwards
         private void prevRemoval()
         {
             trail.Remove(trail.Last());
@@ -464,7 +493,7 @@ namespace WitnessTest
 
             foreach (Wall wall in outerWalls)
             {
-                e.Graphics.FillRectangle(blackBrush, new Rectangle(wall.x, wall.y, wall.width, wall.height));
+                e.Graphics.FillRectangle(wallBrush, new Rectangle(wall.x, wall.y, wall.width, wall.height));
             }
 
             foreach (barrierGen barrier in barriers)
@@ -475,12 +504,13 @@ namespace WitnessTest
             //creates exit ellipse
             e.Graphics.FillEllipse(backgroundBrush, exit);
 
-            if (invertedDoubleState)
+            //draws second exit if the level is greater than 5
+            if (level > 5)
             {
-                e.Graphics.FillEllipse(backgroundBrush, new Rectangle(6, 168, 30, 24));
+                e.Graphics.FillEllipse(backgroundBrush, exit2);
             }
 
-            //draws the trail aspects
+            //draws the trail aspects stored in each list
             foreach (Trail trail in trail)
             {
                 e.Graphics.FillRectangle(trailBrush, new Rectangle(trail.x, trail.y, trail.width, trail.height));
@@ -521,6 +551,7 @@ namespace WitnessTest
                 bool checker;
                 checker = findCircle();
 
+                //draws the circle that the cursor follows, and draws its previous position if player goes out of bounds
                 if (checker == true)
                 {
                     e.Graphics.FillEllipse(trailBrush, followCircle);
@@ -531,7 +562,7 @@ namespace WitnessTest
                 }
                 e.Graphics.FillEllipse(trailBrush, oppositeFollowCircle);
             }
-            else
+            else //follows cursor around regardless of walls
             {
                 e.Graphics.FillEllipse(trailBrush, new Rectangle(cursor.X - 12, cursor.Y - 12, 24, 24));
             }
@@ -539,6 +570,7 @@ namespace WitnessTest
 
         public bool findCircle()
         {
+            //varibles to determine the drawing circles position
             int yPos;
             int xPos;
             bool output;
@@ -547,10 +579,8 @@ namespace WitnessTest
             yPos = cursor.Y - 12;
             if (cursor.Y <= 36)
             {
-                if  (cursor.X >= 600 && cursor.X <= 624 && level >= 5)
-                {
-
-                }
+                if (cursor.X >= 600 && cursor.X <= 624 && level >= 5) { } //probably a smarter way to do this but stops certain conditions for level exiting purposes
+                else if (cursor.X >= 24 && cursor.X <= 48 && doubleState) { }
                 else
                 {
                     yPos = 24;
@@ -571,9 +601,8 @@ namespace WitnessTest
                 xPos = 600;
             }
 
+            prevFollowCircle = followCircle; //tracking the following circle's previous position to draw on if previous follow circle is out of bounds
             //checks if the ellipse is in the horizontal or vertical regions of the game and draws the ellipse accordingly
-            prevFollowCircle = followCircle;
-
             for (int i = 0; i < 5; i++)
             {
                 for (int k = 0; k < 5; k++)
@@ -611,10 +640,13 @@ namespace WitnessTest
 
         private void MenuScreen_MouseMove(object sender, MouseEventArgs e)
         {
+            //tracks mouse's movements and assigns them to the rectangle cursor
             mousePosition = this.PointToClient(Cursor.Position);
-
             cursor = new Rectangle(Convert.ToInt16(mousePosition.X), Convert.ToInt16(mousePosition.Y), 1, 1);
 
+            #region Variable Tracking
+            //tracking variables for testing purposes
+            /*
             xInput.Text = level.ToString();
             yInput.Text = mousePosition.Y.ToString();
 
@@ -626,27 +658,35 @@ namespace WitnessTest
 
             listLabel.Text = trail.Count.ToString();
             listLabel2.Text = intersection.Count.ToString();
+            */
+            #endregion
         }
 
         private void MenuScreen_MouseClick(object sender, MouseEventArgs e)
         {
+            //stops game from being in an active state if clicked
             if (e.Button == MouseButtons.Left && active == true)
             {
+                //clears lists
                 intersection.Clear();
                 trail.Clear();
                 oppositeIntersection.Clear();
                 oppositeTrail.Clear();
+
+                //stops active state and resets mouse speed
                 active = false;
                 AdjustMouseSpeed.SetMouseSpeed(18);
             }
 
+            //check if the cursor is over the starting circle, in which case, put the game into an active state
             if (e.Button == MouseButtons.Left && cursor.IntersectsWith(bottomCircle))
             {
                 active = true;
-                AdjustMouseSpeed.SetMouseSpeed(3);
-                prevPosition = mousePosition;
-                Cursor.Position = this.PointToScreen(new Point(bottomCircle.X + bottomCircle.Width / 2, bottomCircle.Y + bottomCircle.Height / 2));
+                AdjustMouseSpeed.SetMouseSpeed(2); //adjust cursor speed to help prevent clipping
+                prevPosition = mousePosition; //tracks previous mouse position
+                Cursor.Position = this.PointToScreen(new Point(bottomCircle.X + bottomCircle.Width / 2, bottomCircle.Y + bottomCircle.Height / 2)); //puts cursor on starting circle
 
+                //adjusts position of the follow circle
                 followCircle = new Rectangle(Cursor.Position.X - 12, Cursor.Position.Y - 12, 24, 24);
                 oppositeFollowCircle = new Rectangle(this.Width - followCircle.X - 24, this.Height - followCircle.Y - 24, 24, 24);
 
@@ -672,19 +712,25 @@ namespace WitnessTest
 
         private void levelGen()
         {
+            //adds to level
             level++;
+
+            //moves cursor to the starting position
             Cursor.Position = this.PointToScreen(new Point(bottomCircle.X + bottomCircle.Width / 2, bottomCircle.Y + bottomCircle.Height / 2));
 
+            //clears lists
             barriers.Clear();
             intersection.Clear();
             trail.Clear();
 
+            //adds to lists to prevent issues with for loops
             trail.Add(new Trail(0, 0, 0, 0, "null"));
             intersection.Add(new TrailIntersection(24, 600));
 
             switch (level)
             {
                 case 1:
+                    //creates exit
                     exit = new Rectangle(this.Width - 48, 6, 24, 30);
 
                     //set colour scheme
@@ -712,10 +758,11 @@ namespace WitnessTest
                     break;
                 case 2:
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.MediumBlue;
+                    trailBrush = new SolidBrush(Color.LightCyan);
+                    wallBrush = new SolidBrush(Color.RoyalBlue);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.PaleTurquoise);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 2, 1));
@@ -735,10 +782,11 @@ namespace WitnessTest
                     break;
                 case 3:
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.Gold;
+                    trailBrush = new SolidBrush(Color.LemonChiffon);
+                    wallBrush = new SolidBrush(Color.DarkOrange);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.NavajoWhite);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 1, 1));
@@ -758,10 +806,11 @@ namespace WitnessTest
                     break;
                 case 4:
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.LightGray;
+                    trailBrush = new SolidBrush(Color.WhiteSmoke);
+                    wallBrush = new SolidBrush(Color.BurlyWood);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.White);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 2, 1));
@@ -782,10 +831,11 @@ namespace WitnessTest
                     break;
                 case 5:
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.Indigo;
+                    trailBrush = new SolidBrush(Color.Pink);
+                    wallBrush = new SolidBrush(Color.MediumOrchid);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.PaleVioletRed);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 2, 1));
@@ -806,15 +856,17 @@ namespace WitnessTest
                     barriers.Add(new barrierGen("x", 4, 5));
                     break;
                 case 6:
+                    //switches to inverted state with two players and moves exit rectangles
                     invertedDoubleState = true;
                     exit = new Rectangle(this.Width - 36, 456, 30, 24);
                     exit2 = new Rectangle(6, 168, 30, 24);
 
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.Gold;
+                    trailBrush = new SolidBrush(Color.DarkOrange);
+                    wallBrush = new SolidBrush(Color.CadetBlue);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.NavajoWhite);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 3, 1));
@@ -828,10 +880,11 @@ namespace WitnessTest
                     break;
                 case 7:
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.DimGray;
+                    trailBrush = new SolidBrush(Color.WhiteSmoke);
+                    wallBrush = new SolidBrush(Color.LimeGreen);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.Silver);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 1, 2));
@@ -846,10 +899,11 @@ namespace WitnessTest
                     break;
                 case 8:
                     //set colour scheme
-                    trailBrush = new SolidBrush(Color.Orange);
-                    wallBrush = new SolidBrush(Color.Maroon);
-                    backgroundBrush = new SolidBrush(Color.Firebrick);
-                    hoverBrush = new SolidBrush(Color.LightCoral);
+                    this.BackColor = Color.MidnightBlue;
+                    trailBrush = new SolidBrush(Color.Silver);
+                    wallBrush = new SolidBrush(Color.Black);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.Gainsboro);
 
                     //add barriers
                     barriers.Add(new barrierGen("x", 3, 1));
@@ -862,8 +916,89 @@ namespace WitnessTest
                     barriers.Add(new barrierGen("y", 1, 3));
                     break;
                 case 9:
+                    //moves exit rectangles and switches to state with two lines that a mirrored instead of inverted
+                    exit = new Rectangle(24, 6, 24, 30);
+                    exit2 = new Rectangle(600, 6, 24, 30);
+                    invertedDoubleState = false;
+                    doubleState = true;
+
+                    //set colour scheme
+                    this.BackColor = Color.Firebrick;
+                    trailBrush = new SolidBrush(Color.Orange);
+                    wallBrush = new SolidBrush(Color.Maroon);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.LightCoral);
+
+                    //add barriers
+                    barriers.Add(new barrierGen("x", 2, 3));
+                    barriers.Add(new barrierGen("x", 4, 3));
+
+                    barriers.Add(new barrierGen("y", 5, 1));
+                    barriers.Add(new barrierGen("y", 2, 2));
+                    barriers.Add(new barrierGen("y", 5, 4));
                     break;
                 case 10:
+                    //set colour scheme
+                    this.BackColor = Color.MediumBlue;
+                    trailBrush = new SolidBrush(Color.LightCyan);
+                    wallBrush = new SolidBrush(Color.RoyalBlue);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.PaleTurquoise);
+
+                    //add barriers
+                    barriers.Add(new barrierGen("y", 1, 1));
+                    barriers.Add(new barrierGen("y", 4, 2));
+                    barriers.Add(new barrierGen("y", 5, 3));
+                    barriers.Add(new barrierGen("y", 2, 4));
+                    break;
+                case 11:
+                    //set colour scheme
+                    this.BackColor = Color.DimGray;
+                    trailBrush = new SolidBrush(Color.WhiteSmoke);
+                    wallBrush = new SolidBrush(Color.LimeGreen);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.Silver);
+
+                    //add barriers
+                    barriers.Add(new barrierGen("x", 3, 1));
+                    barriers.Add(new barrierGen("x", 4, 3));
+                    barriers.Add(new barrierGen("x", 1, 4));
+
+                    barriers.Add(new barrierGen("y", 2, 1));
+                    barriers.Add(new barrierGen("y", 5, 2));
+                    break;
+                case 12:
+                    exit = new Rectangle(168, 612, 24, 30);
+                    exit2 = new Rectangle(456, 612, 24, 30);
+                    //set colour scheme
+                    this.BackColor = Color.MidnightBlue;
+                    trailBrush = new SolidBrush(Color.Silver);
+                    wallBrush = new SolidBrush(Color.Black);
+                    backgroundBrush = new SolidBrush(this.BackColor);
+                    hoverBrush = new SolidBrush(Color.Gainsboro);
+
+                    doubleState = true;
+
+                    //add barriers
+                    barriers.Add(new barrierGen("x", 3, 1));
+                    barriers.Add(new barrierGen("x", 1, 2));
+                    barriers.Add(new barrierGen("x", 1, 3));
+                    barriers.Add(new barrierGen("x", 2, 3));
+                    barriers.Add(new barrierGen("x", 4, 3));
+                    barriers.Add(new barrierGen("x", 4, 4));
+                    barriers.Add(new barrierGen("x", 1, 5));
+                    barriers.Add(new barrierGen("x", 2, 5));
+
+                    barriers.Add(new barrierGen("y", 3, 1));
+                    barriers.Add(new barrierGen("y", 3, 3));
+                    break;
+                case 13:
+                    //stops timers and flips game state
+                    playTime.Stop();
+                    gameTimer.Stop();
+
+                    //changes screens
+                    Form1.ChangeScreen(this, new GameOverScreen());
                     break;
             }
         }

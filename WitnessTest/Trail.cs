@@ -8,6 +8,7 @@ namespace WitnessTest
 {
     internal class Trail
     {
+        //same setup as a rectangle, but includes the state, which can either be left, right, up, or down
         public int x, y, width, height;
         public string state;
 
