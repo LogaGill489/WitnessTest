@@ -19,7 +19,7 @@ namespace WitnessTest
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            Form1.ChangeScreen(this, new GameOverScreen());
+            Form1.ChangeScreen(this, new GameScreen());
         }
 
         private void exitButton_Click(object sender, EventArgs e)
