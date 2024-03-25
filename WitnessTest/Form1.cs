@@ -53,6 +53,7 @@ namespace WitnessTest
             next.Focus();
         }
 
+        //only used to track mouses position for testing
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
             mousePosition = Cursor.Position;
@@ -61,20 +62,21 @@ namespace WitnessTest
             yInputF1.Text = mousePosition.Y.ToString();
         }
 
+        //used to adjust the labels on the Form1 relative to variables on GameScreen
         private void updateScreen_Tick(object sender, EventArgs e)
         {
-            levelLabel.Text = $"Level: {GameScreen.level}";
+            levelLabel.Text = $"Level: {GameScreen.level}"; //print level
             if (GameScreen.playTime.ElapsedMilliseconds >= 1000 && GameScreen.playTime.ElapsedMilliseconds <= 2000)
             {
-                timeLabel.Text = "1 Second Elapsed";
+                timeLabel.Text = "1 Second Elapsed"; //if time is 1 second, change from seconds to second
             }
             else
             {
-                int time = (int)(GameScreen.playTime.ElapsedMilliseconds / 1000);
+                int time = (int)(GameScreen.playTime.ElapsedMilliseconds / 1000); //print time elapsed
                 timeLabel.Text = $"{time} Seconds Elapsed";
             }
 
-            if (GameScreen.level == 13 || GameScreen.level == 0)
+            if (GameScreen.level == 13 || GameScreen.level == 0) //hide level label
             {
                 levelLabel.Visible = false;
                 timeLabel.Visible = false;
