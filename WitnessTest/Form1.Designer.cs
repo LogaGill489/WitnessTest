@@ -34,6 +34,7 @@
             this.levelLabel = new System.Windows.Forms.Label();
             this.updateScreen = new System.Windows.Forms.Timer(this.components);
             this.copyrightLabel = new System.Windows.Forms.Label();
+            this.timeLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // xInputF1
@@ -43,7 +44,7 @@
             this.xInputF1.Location = new System.Drawing.Point(589, 667);
             this.xInputF1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.xInputF1.Name = "xInputF1";
-            this.xInputF1.Size = new System.Drawing.Size(25, 26);
+            this.xInputF1.Size = new System.Drawing.Size(31, 32);
             this.xInputF1.TabIndex = 1;
             this.xInputF1.Text = "0";
             this.xInputF1.Visible = false;
@@ -55,7 +56,7 @@
             this.yInputF1.Location = new System.Drawing.Point(660, 667);
             this.yInputF1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.yInputF1.Name = "yInputF1";
-            this.yInputF1.Size = new System.Drawing.Size(25, 26);
+            this.yInputF1.Size = new System.Drawing.Size(31, 32);
             this.yInputF1.TabIndex = 2;
             this.yInputF1.Text = "0";
             this.yInputF1.Visible = false;
@@ -90,12 +91,25 @@
             this.copyrightLabel.TabIndex = 13;
             this.copyrightLabel.Text = "LGMazeSoftware Ltd.";
             // 
+            // timeLabel
+            // 
+            this.timeLabel.BackColor = System.Drawing.Color.Transparent;
+            this.timeLabel.Font = new System.Drawing.Font("Palatino Linotype", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.timeLabel.ForeColor = System.Drawing.Color.Black;
+            this.timeLabel.Location = new System.Drawing.Point(444, 0);
+            this.timeLabel.Name = "timeLabel";
+            this.timeLabel.Size = new System.Drawing.Size(247, 23);
+            this.timeLabel.TabIndex = 14;
+            this.timeLabel.Text = "0 Seconds Elapsed";
+            this.timeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(700, 700);
+            this.Controls.Add(this.timeLabel);
             this.Controls.Add(this.copyrightLabel);
             this.Controls.Add(this.levelLabel);
             this.Controls.Add(this.yInputF1);
@@ -118,6 +132,7 @@
         public System.Windows.Forms.Label levelLabel;
         public System.Windows.Forms.Timer updateScreen;
         private System.Windows.Forms.Label copyrightLabel;
+        public System.Windows.Forms.Label timeLabel;
     }
 }
 

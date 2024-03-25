@@ -113,16 +113,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\endWitnessBackground.jpg" />
+    <None Include="Resources\endWitnessBackground.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\startWitnessBackground.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\startWitnessBackground1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\endWitnessBackground1.jpg" />
+    <None Include="Resources\startWitnessBackground.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

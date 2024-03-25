@@ -121,6 +121,7 @@ namespace WitnessTest
             outerLayer = new Wall(0, this.Height - 24, 24, this.Width);
             outerWalls.Add(outerLayer);
 
+            playTime.Reset();
             playTime.Start(); //starts timer that tracks the player's position
 
             level = 0;
@@ -716,7 +717,10 @@ namespace WitnessTest
             level++;
 
             //moves cursor to the starting position
-            Cursor.Position = this.PointToScreen(new Point(bottomCircle.X + bottomCircle.Width / 2, bottomCircle.Y + bottomCircle.Height / 2));
+            if (level != 1)
+            {
+                Cursor.Position = this.PointToScreen(new Point(bottomCircle.X + bottomCircle.Width / 2, bottomCircle.Y + bottomCircle.Height / 2));
+            }
 
             //clears lists
             barriers.Clear();

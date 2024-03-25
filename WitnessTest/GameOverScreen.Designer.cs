@@ -37,10 +37,10 @@
             // 
             // restartButton
             // 
-            this.restartButton.BackColor = System.Drawing.Color.Wheat;
+            this.restartButton.BackColor = System.Drawing.Color.Linen;
             this.restartButton.Font = new System.Drawing.Font("Palatino Linotype", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.restartButton.ForeColor = System.Drawing.Color.Black;
-            this.restartButton.Location = new System.Drawing.Point(174, 316);
+            this.restartButton.Location = new System.Drawing.Point(174, 329);
             this.restartButton.Name = "restartButton";
             this.restartButton.Size = new System.Drawing.Size(300, 67);
             this.restartButton.TabIndex = 0;
@@ -51,10 +51,9 @@
             // winLabel
             // 
             this.winLabel.BackColor = System.Drawing.Color.Transparent;
-            this.winLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.winLabel.Font = new System.Drawing.Font("Palatino Linotype", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.winLabel.ForeColor = System.Drawing.Color.White;
-            this.winLabel.Location = new System.Drawing.Point(124, 42);
+            this.winLabel.Location = new System.Drawing.Point(124, 48);
             this.winLabel.Name = "winLabel";
             this.winLabel.Size = new System.Drawing.Size(400, 63);
             this.winLabel.TabIndex = 1;
@@ -64,10 +63,9 @@
             // scoreLabel
             // 
             this.scoreLabel.BackColor = System.Drawing.Color.Transparent;
-            this.scoreLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.scoreLabel.Font = new System.Drawing.Font("Palatino Linotype", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.scoreLabel.ForeColor = System.Drawing.Color.White;
-            this.scoreLabel.Location = new System.Drawing.Point(149, 130);
+            this.scoreLabel.Location = new System.Drawing.Point(149, 144);
             this.scoreLabel.Name = "scoreLabel";
             this.scoreLabel.Size = new System.Drawing.Size(350, 41);
             this.scoreLabel.TabIndex = 2;
@@ -84,6 +82,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gainsboro;
+            this.BackgroundImage = global::WitnessTest.Properties.Resources.endWitnessBackground;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.Controls.Add(this.scoreLabel);
             this.Controls.Add(this.winLabel);

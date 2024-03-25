@@ -8,6 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+/*
+ * The Witness
+ * Logan Gillett
+ * Mr. T
+ * 25.3.24
+ * ICS4U
+ */
+
 namespace WitnessTest
 { 
     public partial class Form1 : Form
@@ -56,13 +64,25 @@ namespace WitnessTest
         private void updateScreen_Tick(object sender, EventArgs e)
         {
             levelLabel.Text = $"Level: {GameScreen.level}";
+            if (GameScreen.playTime.ElapsedMilliseconds >= 1000 && GameScreen.playTime.ElapsedMilliseconds <= 2000)
+            {
+                timeLabel.Text = "1 Second Elapsed";
+            }
+            else
+            {
+                int time = (int)(GameScreen.playTime.ElapsedMilliseconds / 1000);
+                timeLabel.Text = $"{time} Seconds Elapsed";
+            }
+
             if (GameScreen.level == 13 || GameScreen.level == 0)
             {
                 levelLabel.Visible = false;
+                timeLabel.Visible = false;
             }
             else
             {
                 levelLabel.Visible = true;
+                timeLabel.Visible = true;
             }
             levelLabel.Refresh();
         }
